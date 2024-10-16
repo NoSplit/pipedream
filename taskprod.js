@@ -33,7 +33,7 @@ const assert = require("assert");
  * - initial(): A function to return the initial argument passed to the pipeline.
  *
  * @example
- * const result = await pipeDream(func1, func2, func3)(arg, {
+ * const result = await taskprod(func1, func2, func3)(arg, {
  *   initialContext: { someKey: 'someValue' },
  *   middleware: [middleware1, middleware2]
  * });
@@ -144,12 +144,12 @@ const setResultInContext = (result, context) => {
  * - initial(): A function to return the initial argument passed to the pipeline.
  *
  * @example
- * const result = await pipeDream(func1, func2, func3)(arg, {
+ * const result = await taskprod(func1, func2, func3)(arg, {
  *   initialContext: { someKey: 'someValue' },
  *   middleware: [middleware1, middleware2]
  * });
  */
-const pipeDream = (...methods) => async (arg, {
+const taskprod = (...methods) => async (arg, {
     initialContext = {},
     middleware = [],
 }) => {
@@ -226,7 +226,7 @@ const pipeDream = (...methods) => async (arg, {
 
 // if this script is run directly, run the test function
 if (require.main === module) {
-    // test the pipeDream function
+    // test the taskprod function
     // it should pass the context object to each function
     test("It should apply all middleware to the result in sequence", async () => {
         const middlewares = [
@@ -257,7 +257,7 @@ if (require.main === module) {
             async (arg) => arg * 3
         ];
 
-        const testPipe = pipeDream(...methods);
+        const testPipe = taskprod(...methods);
 
         const [result] = await testPipe(5, { initialContext: {} });
 
@@ -284,7 +284,7 @@ if (require.main === module) {
             async function multiply(arg) { return arg * 2; }
         ];
 
-        const testPipe = pipeDream(...methods);
+        const testPipe = taskprod(...methods);
         const context = { initialContext: {}, middleware: [functionResultsHistoryMiddleware, (result, context) => {
             console.log('log: ', result, context)
                 return [result, context];
@@ -301,7 +301,7 @@ if (require.main === module) {
             async function add(arg) { return arg + 2; }  // 4 + 2 = 6
         ];
 
-        const testPipe = pipeDream(...methods);
+        const testPipe = taskprod(...methods);
         const context = { initialContext: {}, middleware: [functionResultsHistoryMiddleware]};
 
         const [argResult, contextResult] = await testPipe(3, context);
@@ -314,7 +314,7 @@ if (require.main === module) {
             async (arg) => arg + 1
         ];
 
-        const testPipe = pipeDream(...methods);
+        const testPipe = taskprod(...methods);
         const context = { initialContext: {}, middleware: [] };
 
         const [result] = await testPipe(5, context);
@@ -329,7 +329,7 @@ if (require.main === module) {
             async (arg, context) => arg - 5, // 36 - 5 = 31
         ];
 
-        const testPipe = pipeDream(...methods);
+        const testPipe = taskprod(...methods);
         const context = { initialContext: {} };
 
         const [result, workingContext] = await testPipe(5, context);
@@ -351,7 +351,7 @@ if (require.main === module) {
             async (arg, context) => arg * context.previous(2), // 12 * 5 = 60
         ];
 
-        const testPipe = pipeDream(...methods);
+        const testPipe = taskprod(...methods);
         const context = { initialContext: {}, middleware: [historyMiddleware] };
 
         const [result, finalContext] = await testPipe(5, context);
@@ -364,7 +364,7 @@ if (require.main === module) {
 }
 
 module.exports = {
-    pipeDream,
+    taskprod,
     processMiddleware,
     historyMiddleware
 };

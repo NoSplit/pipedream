@@ -6,7 +6,7 @@
  * @param {number} backoffFactor - The factor by which the delay is multiplied after each retry (for exponential backoff).
  *
  * @example
- * const result = await pipeDream(func1, func2, func3)(arg, {
+ * const result = await taskprod(func1, func2, func3)(arg, {
  *     initialContext: { someKey: 'someValue' },
  *     middleware: [retryMiddleware(3, 1000, 2)]  // 3 retries, starting with a 1-second delay, doubling the delay after each failure
  * });
@@ -65,7 +65,7 @@ const retryMiddleware = (maxRetries = 3, initialDelay = 1000, backoffFactor = 2)
 if(require.main === module) {
     const { test, describe, it, beforeEach } = require("node:test");
     const assert = require("assert");
-    const { pipeDream } = require("../pipedream");
+    const { taskprod } = require("../taskprod");
 
     describe('retryMiddleware', () => {
       let fakeMethod;
@@ -157,7 +157,7 @@ if(require.main === module) {
         assert.deepStrictEqual(delays, [10, 20]); // Verifies exponential backoff
       });
     });
-    describe('retryMiddleware integration with pipeDream', () => {
+    describe('retryMiddleware integration with taskprod', () => {
       // Test 1: Successful execution without retries
       it('should execute the method successfully without retries', async () => {
         const fakeMethod = async (arg, context) => {
@@ -165,7 +165,7 @@ if(require.main === module) {
             return res;
         };
 
-        const pipeline = pipeDream(fakeMethod);
+        const pipeline = taskprod(fakeMethod);
 
         const [result, context] = await pipeline(1, {
           middleware: [retryMiddleware(3, 10, 2)], // Retry middleware with 3 retries
@@ -185,7 +185,7 @@ if(require.main === module) {
           return arg + 1;
         };
 
-        const pipeline = pipeDream(fakeMethod);
+        const pipeline = taskprod(fakeMethod);
 
         const [result, context] = await pipeline(1, {
           middleware: [retryMiddleware(3, 10, 2)], // Retry middleware with 3 retries
@@ -201,7 +201,7 @@ if(require.main === module) {
           throw new Error('Permanent Error');
         };
 
-        const pipeline = pipeDream(fakeMethod);
+        const pipeline = taskprod(fakeMethod);
 
         try {
           await pipeline(1, {
@@ -232,7 +232,7 @@ if(require.main === module) {
           fn(); // Call the function immediately
         };
 
-        const pipeline = pipeDream(fakeMethod);
+        const pipeline = taskprod(fakeMethod);
 
         await pipeline(1, {
           middleware: [retryMiddleware(3, 10, 2)], // Retry middleware with 3 retries
